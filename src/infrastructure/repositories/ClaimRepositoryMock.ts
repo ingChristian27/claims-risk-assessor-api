@@ -13,6 +13,7 @@ export class ClaimRepositoryMock implements IClaimRepository {
       'Minor door dent repair',
       450.0,
       ClaimStatus.APPROVE,
+      new Date('2025-10-10'),
       new Date('2025-10-15'),
     ),
     new Claim(
@@ -21,6 +22,7 @@ export class ClaimRepositoryMock implements IClaimRepository {
       'Windshield replacement needed urgently',
       1200.0,
       ClaimStatus.MANUAL_REVIEW,
+      new Date('2025-10-12'),
       new Date('2025-10-16'),
     ),
   ];
@@ -32,7 +34,8 @@ export class ClaimRepositoryMock implements IClaimRepository {
       claim.userId,
       claim.description,
       claim.amount,
-      ClaimStatus.PENDING,
+      claim.status,
+      claim.incidentDate,
       new Date(),
     );
     this.claims.push(newClaim);

@@ -12,7 +12,8 @@ export class Claim {
     public readonly description: string,
     public readonly amount: number,
     public status: ClaimStatus,
-    public readonly submittedAt: Date,
+    public readonly incidentDate: Date,
+    public readonly submittedAt: Date = new Date(),
   ) {}
 
   public updateStatus(newStatus: ClaimStatus): void {
