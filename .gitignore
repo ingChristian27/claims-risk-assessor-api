@@ -37,3 +37,8 @@ coverage/
 logs/
 *.log
 
+# Serverless
+.serverless/
+.serverless_plugins/
+serverless.env.yml
+
