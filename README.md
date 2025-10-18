@@ -1,155 +1,129 @@
-# Claims Risk Assessor - Backend API
+# Claims Risk Assessor
 
-Backend API for insurance claims risk assessment system with AI-powered risk evaluation.
+AI-powered insurance claims risk assessment system with real-time evaluation using OpenAI GPT.
 
-## Table of Contents
+## 🏗️ Architecture
 
-- [Claims Risk Assessor - Backend API](#claims-risk-assessor---backend-api)
-  - [Table of Contents](#table-of-contents)
-  - [Tech Stack](#tech-stack)
-  - [Documentation](#documentation)
-    - [📚 API Documentation](#-api-documentation)
-    - [📊 Architecture \& Diagrams](#-architecture--diagrams)
-  - [Installation](#installation)
-    - [Prerequisites](#prerequisites)
-    - [Setup](#setup)
-  - [Running the Project](#running-the-project)
-    - [Development Mode](#development-mode)
-    - [Production Mode](#production-mode)
-  - [AI Risk Assessment Model](#ai-risk-assessment-model)
-    - [Risk Factors](#risk-factors)
-    - [Decision Thresholds](#decision-thresholds)
-  - [Environment Variables](#environment-variables)
-  - [Testing](#testing)
-  - [License](#license)
+Full-stack application with hexagonal architecture (Ports & Adapters) and Domain-Driven Design. Built as a **monorepo** to accelerate development and maintain type consistency across frontend and backend.
 
----
+## 📦 Project Structure
 
-## Tech Stack
+```
+claims-risk-assessor/
+├── backend/          # Node.js + TypeScript + Express API
+│   ├── src/
+│   │   ├── domain/           # Business logic & entities
+│   │   ├── application/      # Use cases & DTOs
+│   │   ├── infrastructure/   # External services (OpenAI, repositories)
+│   │   └── interfaces/       # Controllers & routes
+│   ├── test/
+│   ├── serverless.yml        # AWS Lambda configuration
+│   └── README.md
+└── frontend/         # React + TypeScript + Material-UI
+    ├── src/
+    │   ├── components/       # Atomic Design (elements, blocks, templates)
+    │   ├── services/         # API client
+    │   └── theme/            # Material-UI theme
+    └── README.md
+```
 
-- **Runtime**: Node.js 18+
+## 🚀 Tech Stack
+
+### Backend
+- **Runtime**: Node.js 20
 - **Language**: TypeScript
 - **Framework**: Express.js
-- **Architecture**: Hexagonal (Ports & Adapters)
-- **Database**: PostgreSQL with Sequelize ORM
+- **Architecture**: Hexagonal (Ports & Adapters) + DDD
+- **AI**: OpenAI GPT-3.5
 - **Validation**: Joi
-- **API Documentation**: Swagger/OpenAPI
+- **Testing**: Jest (15 tests)
+- **Deployment**: AWS Lambda + Serverless Framework
 
-## Documentation
+### Frontend
+- **Framework**: React 18
+- **Language**: TypeScript
+- **UI Library**: Material-UI (MUI)
+- **Build Tool**: Vite
+- **Form Handling**: React Hook Form + Yup
+- **HTTP Client**: Axios
+- **Design**: Atomic Design pattern
 
-### 📚 API Documentation
-**Interactive API Docs (Swagger UI)**: `http://localhost:3000/api-docs`
+## 📚 Documentation
 
-See [Swagger Setup Guide](./docs/swagger-setup.md) for implementation details.
+- [Backend README](./backend/README.md) - API documentation, architecture, setup
+- [Frontend README](./frontend/README.md) - Components, theme, deployment
 
-### 📊 Architecture & Diagrams
-- [Architecture Diagram](./docs/architecture-diagram.md) - System architecture and hexagonal design
-- [Sequence Diagram](./docs/sequence-diagram.md) - API request/response flows
-- [Flow Diagram](./docs/flow-diagram.md) - Risk assessment process flow
-- [Data Model](./docs/data-model.md) - Database schema and entities
-
-## Installation
+## 🛠️ Local Development
 
 ### Prerequisites
-- Node.js 18+
-- PostgreSQL 14+
+- Node.js 20+
 - npm or yarn
 
-### Setup
-
-1. **Clone repository**
+### Backend (Local)
 ```bash
-git clone <repository-url>
 cd backend
-```
-
-2. **Install dependencies**
-```bash
 npm install
-```
-
-3. **Configure environment variables**
-```bash
 cp .env.example .env
-```
-
-Edit `.env`:
-```env
-PORT=3000
-DATABASE_URL=your_database_uri
-NODE_ENV=development
-ALLOWED_ORIGINS=http://localhost:5173
-```
-
-4. **Setup database**
-```bash
-# Create database
-createdb claims_db
-
-# Run migrations
-npm run migrate
-```
-
-## Running the Project
-
-### Development Mode
-```bash
+# Add your OPENAI_API_KEY to .env
 npm run dev
 ```
+
 Server runs on `http://localhost:3000`
 
-### Production Mode
+### Frontend (Local)
 ```bash
-npm run build
-npm start
+cd frontend
+npm install
+npm run dev
 ```
 
-## AI Risk Assessment Model
+App runs on `http://localhost:5173`
 
-The risk assessment model evaluates claims based on multiple factors and returns a risk score (0-100) with a recommended action.
+## ☁️ AWS Deployment
 
-**Location**: `src/domain/services/RiskAssessmentService.ts`
+### Backend (Lambda)
+```bash
+cd backend
+npm run deploy:dev
+```
 
-### Risk Factors
+Deploys to AWS Lambda + API Gateway
 
-1. **Claim Amount** - Higher amounts increase risk
-2. **High-Risk Keywords** - Detection of fraud-related terms
-3. **Medium-Risk Keywords** - Urgency indicators
-4. **Description Length** - Too short or too long descriptions
+### Frontend (Amplify)
+1. Push to GitHub
+2. Connect AWS Amplify to repo
+3. Set root directory: `frontend`
+4. Deploy automatically
 
-### Decision Thresholds
-
-| Risk Score | Action | Description |
-|------------|--------|-------------|
-| 0-29 | APPROVE | Automatic approval |
-| 30-69 | MANUAL_REVIEW | Requires human review |
-| 70-100 | REJECT | Automatic rejection |
-
-For detailed specification, see [AI Model Documentation](../documentation/AI_MODEL_SPECIFICATION.md).
-
-## Environment Variables
-
-| Variable | Description | Example |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
-| DATABASE_URL | PostgreSQL connection string | your_database_uri |
-| NODE_ENV | Environment | development \| production |
-| ALLOWED_ORIGINS | CORS allowed origins | http://localhost:5173 |
-| JWT_SECRET | JWT secret (optional) | your_secret_key |
-
-## Testing
+## 🧪 Testing
 
 ```bash
-# Run all tests
+cd backend
 npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run specific test
-npm test -- RiskAssessmentService
 ```
 
-## License
+## 📊 Current Deployment
 
-This project is for technical evaluation purposes.
+**Backend**: AWS Lambda  
+**Endpoint**: https://1mwbl31uu8.execute-api.us-east-1.amazonaws.com/api
+
+**Frontend**: Local (pending Amplify deployment)
+
+## 🎓 Learning Highlights
+
+This project demonstrates:
+- Hexagonal Architecture in practice
+- Domain-Driven Design principles
+- Professional error handling patterns
+- Test-Driven Development
+- AWS serverless deployment
+- Modern React patterns
+
+## 📝 License
+
+ISC
+
+## 👨‍💻 Author
+
+Christian Dachiardi
+
