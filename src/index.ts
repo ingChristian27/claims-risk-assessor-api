@@ -1,6 +1,7 @@
 import 'tsconfig-paths/register';
 import dotenv from 'dotenv';
 import { ClaimRepositoryMock } from '@infrastructure/repositories/ClaimRepositoryMock';
+import { OpenAIRiskAssessmentService } from '@infrastructure/services/OpenAIRiskAssessmentService';
 import { CreateClaimUseCase } from '@application/usecases/claim/CreateClaimUseCase';
 import { GetClaimByIdUseCase } from '@application/usecases/claim/GetClaimByIdUseCase';
 import { ClaimController } from '@interfaces/controllers/ClaimController';
@@ -11,9 +12,10 @@ dotenv.config();
 async function main() {
   // Initialize adapters/repositories
   const claimRepository = new ClaimRepositoryMock();
+  const riskAssessmentService = new OpenAIRiskAssessmentService();
 
-  // Inject repositories into use cases
-  const createClaimUseCase = new CreateClaimUseCase(claimRepository);
+  // Inject repositories and services into use cases
+  const createClaimUseCase = new CreateClaimUseCase(claimRepository, riskAssessmentService);
   const getClaimByIdUseCase = new GetClaimByIdUseCase(claimRepository);
 
   // Inject use cases into controllers
