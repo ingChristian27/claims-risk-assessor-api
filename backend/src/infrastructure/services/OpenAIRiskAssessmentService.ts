@@ -1,11 +1,9 @@
 import OpenAI from 'openai';
-import { RecommendedAction } from '@domain/entities/RiskAssessment';
 import { DomainException } from '@domain/exceptions';
 import type { Result, DomainError } from '@domain/types';
 import { ErrorCode } from '@domain/types';
 import type {
   IRiskAssessmentService,
-  RiskCalculationResult,
   RiskAssessmentRequest,
 } from '@domain/ports/IRiskAssessmentService';
 
@@ -23,9 +21,7 @@ export class OpenAIRiskAssessmentService implements IRiskAssessmentService {
     });
   }
 
-  public async calculateRisk(
-    request: RiskAssessmentRequest,
-  ): Promise<Result<RiskCalculationResult, DomainError>> {
+  public async calculateRisk(request: RiskAssessmentRequest): Promise<Result<string, DomainError>> {
     try {
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
@@ -51,13 +47,9 @@ export class OpenAIRiskAssessmentService implements IRiskAssessmentService {
         );
       }
 
-      const assessment = JSON.parse(response);
-
+      // Return raw JSON string - domain will parse it
       return {
-        data: {
-          riskScore: Math.max(0, Math.min(100, assessment.riskScore)),
-          recommendedAction: assessment.recommendedAction as RecommendedAction,
-        },
+        data: response,
       };
     } catch (error) {
       console.error('Error calling OpenAI:', error);

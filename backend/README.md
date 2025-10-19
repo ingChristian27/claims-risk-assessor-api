@@ -12,39 +12,51 @@ See [Swagger Setup Guide](./docs/swagger-setup.md) for implementation details.
 - [Architecture Diagram](./docs/architecture-diagram.md) - System architecture and hexagonal design
 - [Sequence Diagram](./docs/sequence-diagram.md) - API request/response flows
 - [Data Model](./docs/data-model.md) - Database schema and entities
+- [DynamoDB Schema](./docs/dynamodb-schema.md) - DynamoDB table structure
+- [AI Safety Design](./docs/ai-safety-design.md) - Human-in-the-Loop pattern and rationale
 
 ## 🤖 AI Risk Assessment Model
 
-The risk assessment model evaluates claims based on multiple factors and returns a risk score (0-100) with a recommended action.
+The AI analyzes claims and provides **recommendations only**. All claims require human review for final decision.
 
 **Location**: `src/domain/services/RiskAssessmentService.ts`
 
-### Risk Factors
+### AI Recommendations
 
-1. **Claim Amount** - Higher amounts increase risk
-2. **High-Risk Keywords** - Detection of fraud-related terms
-3. **Medium-Risk Keywords** - Urgency indicators
-4. **Description Length** - Too short or too long descriptions
+| Risk Score | AI Recommendation | Claim Status | Final Decision |
+|------------|------------------|--------------|----------------|
+| 0-29 | APPROVE | MANUAL_REVIEW | Human decides |
+| 30-69 | MANUAL_REVIEW | MANUAL_REVIEW | Human decides |
+| 70-100 | REJECT | MANUAL_REVIEW | Human decides |
 
-### Decision Thresholds
+**Important**: AI provides `aiRecommendation`, but claim `status` always goes to `MANUAL_REVIEW`. This prevents AI hallucination risks and ensures human oversight.
 
-| Risk Score | Action | Description |
-|------------|--------|-------------|
-| 0-29 | APPROVE | Automatic approval |
-| 30-69 | MANUAL_REVIEW | Requires human review |
-| 70-100 | REJECT | Automatic rejection |
-
-For detailed specification, see [AI Model Documentation](../documentation/AI_MODEL_SPECIFICATION.md).
+See [AI Safety Design](./docs/ai-safety-design.md) for detailed rationale.
 
 ## 🔐 Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| PORT | Server port | 3000 |
-| DATABASE_URL | PostgreSQL connection string | your_database_uri |
-| NODE_ENV | Environment | development \| production |
-| ALLOWED_ORIGINS | CORS allowed origins | http://localhost:5173 |
-| OPENAI_API_KEY | OpenAI API key for AI risk assessment | sk-... |
+### For Local Development
+
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| PORT | Server port | No (default: 3000) | 3000 |
+| OPENAI_API_KEY | OpenAI API key for AI risk assessment | Yes | sk-... |
+
+Create `.env` file in backend directory:
+```bash
+cp .env.example .env
+```
+
+### For AWS Lambda Deployment
+
+Configured in `serverless.yml`:
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| NODE_ENV | Serverless config | Environment stage (dev/prod) |
+| OPENAI_API_KEY | Environment variable | Taken from your local env when deploying |
+
+**Note**: Currently using in-memory Mock repository (ready for DynamoDB migration).
 
 ## 🧪 Advanced Testing
 

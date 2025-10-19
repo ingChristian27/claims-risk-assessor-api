@@ -74,6 +74,8 @@ Server runs on `http://localhost:3000`
 ```bash
 cd frontend
 npm install
+cp .env.example .env
+# Update VITE_API_URL if needed (defaults to http://localhost:3000/api)
 npm run dev
 ```
 
@@ -92,8 +94,13 @@ Deploys to AWS Lambda + API Gateway
 ### Frontend (Amplify)
 1. Push to GitHub
 2. Connect AWS Amplify to repo
-3. Set root directory: `frontend`
-4. Deploy automatically
+3. Configure build settings:
+   - **App root directory**: `frontend`
+   - Use the provided `amplify.yml` configuration
+4. Add environment variable:
+   - **Key**: `VITE_API_URL`
+   - **Value**: `https://your-api-id.execute-api.us-east-1.amazonaws.com/api`
+5. Deploy automatically
 
 ## 🧪 Testing
 
@@ -102,12 +109,13 @@ cd backend
 npm test
 ```
 
-## 📊 Current Deployment
+## 📊 Production Deployment
 
-**Backend**: AWS Lambda  
-**Endpoint**: https://1mwbl31uu8.execute-api.us-east-1.amazonaws.com/api
+**Frontend**: AWS Amplify  
+**URL**: https://main.d1n498i7rx6ywn.amplifyapp.com
 
-**Frontend**: Local (pending Amplify deployment)
+**Backend**: AWS Lambda + API Gateway  
+**Region**: us-east-1
 
 ## 🎓 Learning Highlights
 

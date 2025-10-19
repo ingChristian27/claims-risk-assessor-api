@@ -48,49 +48,57 @@ export class CreateClaimUseCase {
     const riskAssessmentRequest =
       this.riskAssessmentService.generateRiskAssessmentRequest(savedClaim);
 
-    // 4. Calculate risk score using external service (OpenAI)
-    const { data: aiResponse, error: aiError } =
+    // 4. Call AI service to get raw JSON response
+    const { data: aiJsonResponse, error: aiError } =
       await this.riskAssessmentServicePort.calculateRisk(riskAssessmentRequest);
 
-    let riskCalculation;
-
-    // 5. If external service fails, use domain business rules
+    // 5. Throw error if AI service fails
     if (aiError) {
-      console.warn(
-        `External risk assessment failed: ${aiError.message}. Using domain business rules.`,
+      throw new DomainException(
+        `AI risk assessment failed: ${aiError.message}`,
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        { originalError: aiError },
       );
-      riskCalculation = this.riskAssessmentService.calculateRiskByBusinessRules(savedClaim);
-    } else if (aiResponse) {
-      riskCalculation = aiResponse;
-    } else {
-      throw new Error('Risk assessment failed: No data or error returned');
     }
+
+    if (!aiJsonResponse) {
+      throw new DomainException(
+        'Risk assessment failed: No response from AI service',
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+      );
+    }
+
+    // 6. Parse and validate AI response (domain logic)
+    const riskCalculation = this.riskAssessmentService.parseAIResponse(aiJsonResponse);
 
     // 7. Create risk assessment entity
     const riskAssessment = this.riskAssessmentService.createAssessment(
       savedClaim.claimId,
       riskCalculation.riskScore,
       riskCalculation.recommendedAction,
+      riskCalculation.category,
     );
 
-    // 8. TODO: Save risk assessment to repository
+    // 8. Set AI recommendation and update status to MANUAL_REVIEW
+    // Note: Status always goes to MANUAL_REVIEW to prevent AI auto-approval/rejection
+    savedClaim.setAIRecommendation(riskCalculation.recommendedAction);
 
-    // 9. Update claim status based on recommendation
-    savedClaim.updateStatus(ClaimStatus[riskCalculation.recommendedAction]);
+    // 9. Save risk assessment to claim in database
+    await this.claimRepository.updateWithRiskAssessment(savedClaim.claimId, riskAssessment);
 
-    // 10. TODO: Update claim in repository
-
-    // 11. Return complete response
+    // 10. Return complete response
     return {
       claimId: savedClaim.claimId,
       userId: savedClaim.userId,
       description: savedClaim.description,
       amount: savedClaim.amount,
       status: savedClaim.status,
+      aiRecommendation: savedClaim.aiRecommendation,
       submittedAt: savedClaim.submittedAt,
       riskAssessment: {
         riskScore: riskAssessment.riskScore,
         recommendedAction: riskAssessment.recommendedAction,
+        category: riskAssessment.category,
       },
     };
   }

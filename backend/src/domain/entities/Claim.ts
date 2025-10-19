@@ -1,8 +1,10 @@
+import { RecommendedAction } from './RiskAssessment';
+
 export enum ClaimStatus {
   PENDING = 'PENDING',
-  APPROVE = 'APPROVE',
   MANUAL_REVIEW = 'MANUAL_REVIEW',
-  REJECT = 'REJECT',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }
 
 export class Claim {
@@ -14,9 +16,21 @@ export class Claim {
     public status: ClaimStatus,
     public readonly incidentDate: Date,
     public readonly submittedAt: Date = new Date(),
+    public aiRecommendation?: RecommendedAction,
   ) {}
 
-  public updateStatus(newStatus: ClaimStatus): void {
-    this.status = newStatus;
+  public setAIRecommendation(recommendation: RecommendedAction): void {
+    this.aiRecommendation = recommendation;
+    // Always set to MANUAL_REVIEW after AI assessment
+    // Human review required due to AI hallucination risk
+    this.status = ClaimStatus.MANUAL_REVIEW;
+  }
+
+  public approveByHuman(): void {
+    this.status = ClaimStatus.APPROVED;
+  }
+
+  public rejectByHuman(): void {
+    this.status = ClaimStatus.REJECTED;
   }
 }

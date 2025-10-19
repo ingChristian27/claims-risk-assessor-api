@@ -1,9 +1,10 @@
-import { RecommendedAction } from '@domain/entities/RiskAssessment';
+import { RecommendedAction, ClaimCategory } from '@domain/entities/RiskAssessment';
 import type { Result, DomainError } from '@domain/types';
 
 export interface RiskCalculationResult {
   riskScore: number;
   recommendedAction: RecommendedAction;
+  category: ClaimCategory;
 }
 
 export interface RiskAssessmentRequest {
@@ -16,8 +17,7 @@ export interface RiskAssessmentRequest {
   };
 }
 
+// Infrastructure service only returns raw JSON string from AI
 export interface IRiskAssessmentService {
-  calculateRisk(
-    request: RiskAssessmentRequest,
-  ): Promise<Result<RiskCalculationResult, DomainError>>;
+  calculateRisk(request: RiskAssessmentRequest): Promise<Result<string, DomainError>>;
 }
