@@ -1,5 +1,5 @@
 import { IClaimRepository } from '@application/ports/IClaimRepository';
-import { Claim, ClaimStatus } from '@domain/entities';
+import { Claim, ClaimStatus, RiskAssessment, RecommendedAction } from '@domain/entities';
 
 // Mock implementation of ClaimRepository
 // This will be replaced with real database implementation later
@@ -12,9 +12,10 @@ export class ClaimRepositoryMock implements IClaimRepository {
       'user-001',
       'Minor door dent repair',
       450.0,
-      ClaimStatus.APPROVE,
+      ClaimStatus.MANUAL_REVIEW,
       new Date('2025-10-10'),
       new Date('2025-10-15'),
+      RecommendedAction.APPROVE,
     ),
     new Claim(
       'claim-002',
@@ -24,6 +25,7 @@ export class ClaimRepositoryMock implements IClaimRepository {
       ClaimStatus.MANUAL_REVIEW,
       new Date('2025-10-12'),
       new Date('2025-10-16'),
+      RecommendedAction.MANUAL_REVIEW,
     ),
   ];
 
@@ -51,5 +53,12 @@ export class ClaimRepositoryMock implements IClaimRepository {
   async findAll(): Promise<Claim[]> {
     // Mock: Return all claims
     return this.claims;
+  }
+
+  async updateWithRiskAssessment(claimId: string, riskAssessment: RiskAssessment): Promise<void> {
+    const claim = this.claims.find((c) => c.claimId === claimId);
+    if (claim) {
+      claim.setAIRecommendation(riskAssessment.recommendedAction);
+    }
   }
 }

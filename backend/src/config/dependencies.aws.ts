@@ -1,16 +1,16 @@
-import { ClaimRepositoryMock } from '@infrastructure/repositories/ClaimRepositoryMock';
+import { ClaimRepositoryDynamoDB } from '@infrastructure/repositories/ClaimRepositoryDynamoDB';
 import { OpenAIRiskAssessmentService } from '@infrastructure/services/OpenAIRiskAssessmentService';
 import { CreateClaimUseCase } from '@application/usecases/claim/CreateClaimUseCase';
 import { GetClaimByIdUseCase } from '@application/usecases/claim/GetClaimByIdUseCase';
 import { ClaimController } from '@interfaces/controllers/ClaimController';
+import { IClaimRepository } from '@application/ports/IClaimRepository';
 
 /**
- * Dependency injection configuration
- * Currently using Mock repository (ready for DynamoDB implementation)
+ * Dependency injection configuration for AWS Lambda
  */
-export function createDependencies() {
-  // Initialize repository (using Mock for now)
-  const claimRepository = new ClaimRepositoryMock();
+export function createDependenciesAWS() {
+  // Initialize DynamoDB repository
+  const claimRepository: IClaimRepository = new ClaimRepositoryDynamoDB();
 
   // Initialize services
   const riskAssessmentService = new OpenAIRiskAssessmentService();

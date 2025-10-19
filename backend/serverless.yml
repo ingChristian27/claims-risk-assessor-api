@@ -11,6 +11,22 @@ provider:
   environment:
     NODE_ENV: ${self:provider.stage}
     OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+    CLAIMS_TABLE: ${self:custom.claimsTableName}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:PutItem
+            - dynamodb:GetItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - dynamodb:Query
+            - dynamodb:Scan
+          Resource:
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.claimsTableName}
+            - arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.claimsTableName}/index/*
 
 functions:
   api:
@@ -29,7 +45,39 @@ plugins:
   - serverless-offline
 
 custom:
+  claimsTableName: ${self:service}-claims-${self:provider.stage}
   serverless-offline:
     httpPort: 3000
     lambdaPort: 3002
 
+resources:
+  Resources:
+    ClaimsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.claimsTableName}
+        BillingMode: PAY_PER_REQUEST
+        AttributeDefinitions:
+          - AttributeName: claimId
+            AttributeType: S
+          - AttributeName: userId
+            AttributeType: S
+          - AttributeName: submittedAt
+            AttributeType: S
+        KeySchema:
+          - AttributeName: claimId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: UserIdIndex
+            KeySchema:
+              - AttributeName: userId
+                KeyType: HASH
+              - AttributeName: submittedAt
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        Tags:
+          - Key: Environment
+            Value: ${self:provider.stage}
+          - Key: Service
+            Value: ${self:service}

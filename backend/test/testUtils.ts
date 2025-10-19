@@ -2,7 +2,7 @@ import 'tsconfig-paths/register';
 import type { IRiskAssessmentService } from '@domain/ports/IRiskAssessmentService';
 import type { Result, DomainError } from '@domain/types';
 import { ErrorCode } from '@domain/types';
-import { RecommendedAction } from '@domain/entities/RiskAssessment';
+import { RecommendedAction, ClaimCategory } from '@domain/entities/RiskAssessment';
 import { ClaimRepositoryMock } from '@infrastructure/repositories/ClaimRepositoryMock';
 import { CreateClaimUseCase } from '@application/usecases/claim/CreateClaimUseCase';
 import { GetClaimByIdUseCase } from '@application/usecases/claim/GetClaimByIdUseCase';
@@ -13,7 +13,11 @@ import { createServer } from '@infrastructure/http/server';
 export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService {
   private shouldFail: boolean = false;
 
-  private mockResponse?: { riskScore: number; recommendedAction: RecommendedAction };
+  private mockResponse?: {
+    riskScore: number;
+    recommendedAction: RecommendedAction;
+    category: ClaimCategory;
+  };
 
   // Configure to simulate failure
   public setFailure(shouldFail: boolean): void {
@@ -24,6 +28,7 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
   public setMockResponse(response: {
     riskScore: number;
     recommendedAction: RecommendedAction;
+    category: ClaimCategory;
   }): void {
     this.mockResponse = response;
   }
@@ -34,7 +39,7 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
     this.mockResponse = undefined;
   }
 
-  public async calculateRisk(request: any): Promise<Result<any, DomainError>> {
+  public async calculateRisk(request: any): Promise<Result<string, DomainError>> {
     // Simulate service failure
     if (this.shouldFail) {
       return {
@@ -48,14 +53,15 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
     // Use custom response or calculate by amount
     if (this.mockResponse) {
       return {
-        data: this.mockResponse,
+        data: JSON.stringify(this.mockResponse),
       };
     }
 
-    // Default logic based on claim amount (domain business rules)
+    // Default logic based on claim amount
     const { amount } = request.claimData;
     let riskScore: number;
     let recommendedAction: RecommendedAction;
+    const category = ClaimCategory.AUTO; // Default category for tests
 
     if (amount < 1000) {
       riskScore = 15;
@@ -68,8 +74,9 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
       recommendedAction = RecommendedAction.REJECT;
     }
 
+    // Return JSON string like real service
     return {
-      data: { riskScore, recommendedAction },
+      data: JSON.stringify({ riskScore, recommendedAction, category }),
     };
   }
 }

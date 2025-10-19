@@ -1,32 +1,51 @@
 import { Claim } from '@domain/entities/Claim';
-import { RiskAssessment, RecommendedAction } from '@domain/entities/RiskAssessment';
+import { RiskAssessment, RecommendedAction, ClaimCategory } from '@domain/entities/RiskAssessment';
 import type {
   RiskAssessmentRequest,
   RiskCalculationResult,
 } from '@domain/ports/IRiskAssessmentService';
+import { DomainException } from '@domain/exceptions';
+import { ErrorCode } from '@domain/types';
 
 export class RiskAssessmentService {
-  /**
-   * Calculates risk using business rules (fallback when external service fails)
-   */
-  public calculateRiskByBusinessRules(claim: Claim): RiskCalculationResult {
-    const { amount } = claim;
+  public parseAIResponse(jsonResponse: string): RiskCalculationResult {
+    try {
+      const parsed = JSON.parse(jsonResponse);
 
-    let riskScore: number;
-    let recommendedAction: RecommendedAction;
+      // Validate required fields
+      if (typeof parsed.riskScore !== 'number') {
+        throw new Error('Invalid riskScore in AI response');
+      }
+      if (!parsed.recommendedAction) {
+        throw new Error('Missing recommendedAction in AI response');
+      }
+      if (!parsed.category) {
+        throw new Error('Missing category in AI response');
+      }
 
-    if (amount < 1000) {
-      riskScore = 15;
-      recommendedAction = RecommendedAction.APPROVE;
-    } else if (amount < 5000) {
-      riskScore = 35;
-      recommendedAction = RecommendedAction.MANUAL_REVIEW;
-    } else {
-      riskScore = 75;
-      recommendedAction = RecommendedAction.REJECT;
+      // Clamp risk score between 0-100
+      const riskScore = Math.max(0, Math.min(100, parsed.riskScore));
+
+      // Validate enum values
+      if (!Object.values(RecommendedAction).includes(parsed.recommendedAction)) {
+        throw new Error(`Invalid recommendedAction: ${parsed.recommendedAction}`);
+      }
+      if (!Object.values(ClaimCategory).includes(parsed.category)) {
+        throw new Error(`Invalid category: ${parsed.category}`);
+      }
+
+      return {
+        riskScore,
+        recommendedAction: parsed.recommendedAction as RecommendedAction,
+        category: parsed.category as ClaimCategory,
+      };
+    } catch (error) {
+      throw new DomainException(
+        `Failed to parse AI response: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        ErrorCode.VALIDATION_ERROR,
+        { originalResponse: jsonResponse },
+      );
     }
-
-    return { riskScore, recommendedAction };
   }
 
   public generateRiskAssessmentRequest(claim: Claim): RiskAssessmentRequest {
@@ -44,17 +63,32 @@ Claim Details:
 
 Respond ONLY in JSON format with this exact structure:
 {
-  "riskScore": [number from 0 to 100, where 0 is no risk and 100 is very high risk],
-  "recommendedAction": ["APPROVE", "MANUAL_REVIEW", "REJECT"],
-  "reasoning": "[brief explanation of the decision]"
+  "riskScore": 45,
+  "recommendedAction": "APPROVE",
+  "category": "AUTO",
+  "reasoning": "Brief explanation here"
 }
+
+Valid values:
+- riskScore: number from 0 to 100
+- recommendedAction: APPROVE | MANUAL_REVIEW | REJECT
+- category: AUTO | HEALTH | HOME | LIFE | PROPERTY | TRAVEL | OTHER
 
 Consider these factors:
 - Claim amount and reasonableness
 - Incident description clarity and plausibility
 - Potential fraud patterns (unusual claims, inconsistencies)
 - Case complexity and documentation quality
-- Historical risk indicators`;
+- Historical risk indicators
+
+Categories:
+- AUTO: Vehicle-related claims (accidents, repairs, theft)
+- HEALTH: Medical and healthcare claims
+- HOME: Home insurance claims (damage, theft, liability)
+- LIFE: Life insurance claims
+- PROPERTY: General property damage or loss
+- TRAVEL: Travel insurance claims
+- OTHER: Claims that don't fit other categories`;
 
     return {
       systemMessage,
@@ -71,12 +105,14 @@ Consider these factors:
     claimId: string,
     riskScore: number,
     recommendedAction: RecommendedAction,
+    category: ClaimCategory,
   ): RiskAssessment {
     return new RiskAssessment(
       `assessment-${Date.now()}`,
       claimId,
       riskScore,
       recommendedAction,
+      category,
       new Date(),
     );
   }
