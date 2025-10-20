@@ -46,6 +46,7 @@ claims-risk-assessor/
 - **Build Tool**: Vite
 - **Form Handling**: React Hook Form + Yup
 - **HTTP Client**: Axios
+- **Testing**: Vitest + React Testing Library (16 tests including integration)
 - **Design**: Atomic Design pattern
 
 ## 📚 Documentation
@@ -102,8 +103,15 @@ Deploys to AWS Lambda + API Gateway
 
 ## 🧪 Testing
 
+**Backend (Jest):**
 ```bash
 cd backend
+npm test
+```
+
+**Frontend (Vitest):**
+```bash
+cd frontend
 npm test
 ```
 
@@ -114,6 +122,8 @@ npm test
 - **Domain-Driven Design**: Rich domain entities with business logic
 - **AI Safety**: Human-in-the-Loop pattern prevents AI hallucination risks
 - **DynamoDB Integration**: Serverless persistence with GSI for queries
+- **Security**: Helmet.js headers, CORS configuration, input validation
+- **Testing**: 87% coverage with 23 strategic tests
 - **Error Handling**: Centralized domain exceptions with error codes
 - **TypeScript**: Strict type safety across the stack
 
@@ -124,6 +134,7 @@ npm test
 - **Axios Interceptors**: Centralized HTTP error handling
 - **Atomic Design**: Scalable component hierarchy
 - **Performance**: Selective React.memo optimization
+- **Testing**: 16 tests with Vitest + React Testing Library (includes integration tests)
 
 ### DevOps
 - **Monorepo**: Single repository for frontend and backend
