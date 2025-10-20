@@ -5,6 +5,7 @@ export interface RiskCalculationResult {
   riskScore: number;
   recommendedAction: RecommendedAction;
   category: ClaimCategory;
+  reasoning: string;
 }
 
 export interface RiskAssessmentRequest {

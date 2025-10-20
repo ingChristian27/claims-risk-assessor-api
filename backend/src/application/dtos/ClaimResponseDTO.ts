@@ -10,5 +10,6 @@ export interface ClaimResponseDTO {
     riskScore: number;
     recommendedAction: string;
     category: string;
+    reasoning: string;
   };
 }

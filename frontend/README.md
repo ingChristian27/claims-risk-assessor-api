@@ -1,30 +1,53 @@
 # Claims Risk Assessor - Frontend
 
-React frontend application for insurance claims risk assessment with Material-UI and Atomic Design pattern.
+React + TypeScript frontend with Material-UI, Atomic Design, and professional architecture patterns.
 
 ## 🚀 Tech Stack
 
-- **Framework**: React 18
-- **Language**: TypeScript
+- **Framework**: React 18 + TypeScript
 - **Build Tool**: Vite
-- **UI Library**: Material-UI (MUI)
+- **UI Library**: Material-UI (MUI) + Icons
 - **Form Handling**: React Hook Form + Yup validation
-- **HTTP Client**: Axios
-- **Design Pattern**: Atomic Design (elements → blocks → templates → pages)
+- **HTTP Client**: Axios with interceptors
+- **State Management**: Custom hooks (useApiMutation)
+- **Design Pattern**: Atomic Design + Container/Presentational
+- **Path Aliases**: Clean imports (@hooks, @blocks, @components)
 
 ## 📦 Project Structure
 
 ```
 src/
 ├── components/
-│   ├── elements/          # Atomic components (Button, Badge, etc.)
-│   ├── blocks/            # Composite components (ClaimForm, RiskPanel)
-│   └── templates/         # Page layouts (MainLayout)
-├── pages/                 # Page components (HomePage)
-├── services/              # API client (Axios configuration)
-├── theme/                 # Material-UI theme customization
-└── types/                 # TypeScript type definitions
+│   ├── elements/          # Atomic: Button, Badge, CategoryChip, RiskScoreGauge
+│   ├── blocks/            # Composite: ClaimForm, RiskAssessmentPanel, EmptyState
+│   └── templates/         # Layouts: MainLayout
+├── pages/                 # Pages: HomePage (Container pattern)
+├── hooks/                 # Custom hooks: useApiMutation
+├── services/              # API client with Axios interceptors
+├── utils/                 # Utilities: formatCurrency
+├── theme/                 # Material-UI theme
+└── types/                 # TypeScript definitions
 ```
+
+## ✨ Key Features
+
+### Architecture Patterns
+- **Container/Presentational**: Logic separation for testability
+- **Custom Hooks**: `useApiMutation` - generic API mutation hook (React Query pattern)
+- **Path Aliases**: Clean imports (`@hooks`, `@blocks`, `@components`)
+- **Atomic Design**: Scalable component hierarchy
+
+### User Experience
+- **Loading States**: Skeleton loaders during API calls
+- **Error Handling**: Axios interceptors with user-friendly messages
+- **Responsive Design**: Mobile-first layout
+- **Category Icons**: Visual claim type identification (Auto 🚗, Health 🏥, etc.)
+- **Form Validation**: Real-time validation with Yup schema
+
+### Performance
+- **React.memo**: Selective memoization on CategoryChip and Badge
+- **Code Splitting**: Vite automatic optimizations
+- **Lazy Loading**: Future-ready architecture
 
 ## 🛠️ Local Development
 
@@ -42,20 +65,13 @@ npm install
 2. **Configure environment variables**
 ```bash
 cp .env.example .env
-```
-
-Edit `.env` and set your backend URL:
-```env
-# Backend API URL (defaults to localhost if not set)
-VITE_API_URL=http://localhost:3000/api
+# Edit .env and set VITE_API_URL to your backend URL
 ```
 
 3. **Start development server**
 ```bash
 npm run dev
 ```
-
-App runs on `http://localhost:5173`
 
 ## 🔧 Available Scripts
 
@@ -75,17 +91,22 @@ npm run lint
 
 ## 🌍 Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `VITE_API_URL` | Backend API base URL | No | `http://localhost:3000/api` |
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `VITE_API_URL` | Backend API base URL | Yes |
 
-**Important:** All environment variables exposed to the frontend **must** start with `VITE_` prefix (Vite security requirement).
+**Important:** All environment variables must start with `VITE_` prefix (Vite requirement).
 
-### Production Example
+### Examples
 
-For AWS Lambda backend:
+**Local development:**
 ```env
-VITE_API_URL=https://your-api-id.execute-api.us-east-1.amazonaws.com/api
+VITE_API_URL=http://localhost:PORT/api
+```
+
+**Production (AWS Lambda):**
+```env
+VITE_API_URL=https://your-api-gateway-url.amazonaws.com/api
 ```
 
 ## ☁️ AWS Amplify Deployment
@@ -126,33 +147,34 @@ Add in AWS Amplify Console → Environment variables:
 
 ## 🎨 Design System
 
-### Atomic Design Structure
+**Atomic Design Hierarchy:**
+- **Elements**: `Button`, `Badge`, `CategoryChip`, `RiskScoreGauge`
+- **Blocks**: `ClaimForm`, `RiskAssessmentPanel`, `EmptyState`
+- **Templates**: `MainLayout`
+- **Pages**: `HomePage`
 
-- **Elements** (`components/elements/`): Basic building blocks
-  - `Button`, `Badge`, `RiskScoreGauge`
+**Theme**: Custom Material-UI theme in `src/theme/theme.ts`
 
-- **Blocks** (`components/blocks/`): Feature-specific components
-  - `ClaimForm`, `RiskAssessmentPanel`
+## 🏗️ Architecture Highlights
 
-- **Templates** (`components/templates/`): Page layouts
-  - `MainLayout`
+### Path Aliases
+```typescript
+import { useApiMutation } from '@hooks/useApiMutation';
+import { ClaimForm } from '@blocks/ClaimForm/ClaimForm';
+import { formatCurrency } from '@utils/currency';
+```
 
-- **Pages** (`pages/`): Complete pages
-  - `HomePage`
+### Custom Hooks
+```typescript
+// useApiMutation - Generic mutation hook (React Query pattern)
+const { mutate, isLoading, error, data } = useApiMutation(createClaim);
+```
 
-### Theme Customization
-
-Theme configuration in `src/theme/theme.ts`:
-- Color palette
-- Typography
-- Spacing
-- Component overrides
-
-## 📊 Production Deployment
-
-**Frontend**: https://main.d1n498i7rx6ywn.amplifyapp.com
-
-**Backend**: AWS Lambda (us-east-1)
+### Axios Interceptors
+- Request logging (dev only)
+- Centralized error handling
+- User-friendly error messages
+- 30s timeout
 
 ## 📝 License
 

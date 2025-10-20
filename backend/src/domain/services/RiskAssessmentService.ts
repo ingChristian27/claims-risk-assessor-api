@@ -34,10 +34,15 @@ export class RiskAssessmentService {
         throw new Error(`Invalid category: ${parsed.category}`);
       }
 
+      // Validate recommendedAction matches riskScore (prevent AI hallucination)
+      const expectedAction = this.getExpectedAction(riskScore);
+      const finalRecommendedAction = expectedAction; // Override AI if inconsistent
+
       return {
         riskScore,
-        recommendedAction: parsed.recommendedAction as RecommendedAction,
+        recommendedAction: finalRecommendedAction,
         category: parsed.category as ClaimCategory,
+        reasoning: parsed.reasoning || 'No reasoning provided',
       };
     } catch (error) {
       throw new DomainException(
@@ -46,6 +51,12 @@ export class RiskAssessmentService {
         { originalResponse: jsonResponse },
       );
     }
+  }
+
+  private getExpectedAction(riskScore: number): RecommendedAction {
+    if (riskScore <= 30) return RecommendedAction.APPROVE;
+    if (riskScore <= 70) return RecommendedAction.MANUAL_REVIEW;
+    return RecommendedAction.REJECT;
   }
 
   public generateRiskAssessmentRequest(claim: Claim): RiskAssessmentRequest {
@@ -73,6 +84,11 @@ Valid values:
 - riskScore: number from 0 to 100
 - recommendedAction: APPROVE | MANUAL_REVIEW | REJECT
 - category: AUTO | HEALTH | HOME | LIFE | PROPERTY | TRAVEL | OTHER
+
+Risk Assessment Rules:
+- riskScore 0-30: Recommend APPROVE (low risk, straightforward claims)
+- riskScore 31-70: Recommend MANUAL_REVIEW (medium risk, needs human review)
+- riskScore 71-100: Recommend REJECT (high risk, fraud indicators)
 
 Consider these factors:
 - Claim amount and reasonableness
@@ -106,6 +122,7 @@ Categories:
     riskScore: number,
     recommendedAction: RecommendedAction,
     category: ClaimCategory,
+    reasoning: string,
   ): RiskAssessment {
     return new RiskAssessment(
       `assessment-${Date.now()}`,
@@ -113,6 +130,7 @@ Categories:
       riskScore,
       recommendedAction,
       category,
+      reasoning,
       new Date(),
     );
   }

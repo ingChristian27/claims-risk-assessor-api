@@ -68,6 +68,7 @@ describe('POST /api/claims - Create Claim with Risk Assessment', () => {
         riskScore: 42,
         recommendedAction: RecommendedAction.MANUAL_REVIEW,
         category: ClaimCategory.HEALTH,
+        reasoning: 'Medical claim requires detailed review',
       });
 
       const claimData = {

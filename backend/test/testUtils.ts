@@ -17,6 +17,7 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
     riskScore: number;
     recommendedAction: RecommendedAction;
     category: ClaimCategory;
+    reasoning: string;
   };
 
   // Configure to simulate failure
@@ -29,8 +30,9 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
     riskScore: number;
     recommendedAction: RecommendedAction;
     category: ClaimCategory;
+    reasoning?: string;
   }): void {
-    this.mockResponse = response;
+    this.mockResponse = { ...response, reasoning: response.reasoning || 'Test reasoning' };
   }
 
   // Reset to default state
@@ -62,6 +64,7 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
     let riskScore: number;
     let recommendedAction: RecommendedAction;
     const category = ClaimCategory.AUTO; // Default category for tests
+    const reasoning = 'Test risk assessment based on claim amount';
 
     if (amount < 1000) {
       riskScore = 15;
@@ -76,7 +79,7 @@ export class MockRiskAssessmentServiceForTests implements IRiskAssessmentService
 
     // Return JSON string like real service
     return {
-      data: JSON.stringify({ riskScore, recommendedAction, category }),
+      data: JSON.stringify({ riskScore, recommendedAction, category, reasoning }),
     };
   }
 }
