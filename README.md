@@ -117,6 +117,8 @@ npm test
 
 ## 🎓 Key Features
 
+**Note**: User authentication system is designed but not yet implemented. Current version uses mock userId for testing.
+
 ### Backend
 - **Hexagonal Architecture**: Clean separation of domain, application, and infrastructure
 - **Domain-Driven Design**: Rich domain entities with business logic
@@ -143,4 +145,8 @@ npm test
 - **AWS Lambda**: Auto-scaling, pay-per-use
 - **AWS Amplify**: CI/CD for frontend
 - **Environment Management**: Secure configuration handling
+
+## 💡 Future Enhancements
+
+**AI Audit Trail**: Track prompts, tokens, costs, and response times. Enables data-driven model comparison (OpenAI vs Anthropic vs Bedrock) and cost optimization.
 

@@ -1,62 +1,73 @@
 # AI Safety Design
 
-## Problem
-AI models hallucinate. Auto-approving/rejecting insurance claims based solely on AI is risky.
+## Human-in-the-Loop Pattern
 
-## Solution: Human-in-the-Loop
+### The Problem
+AI models can hallucinate or make incorrect recommendations, especially in high-stakes domains like insurance claims.
 
-**AI recommends. Humans decide.**
+### Our Solution
+**All claims require human review for final decision.**
+
+```
+AI suggests → Human decides
+```
+
+## Implementation
 
 ### Status Flow
 ```
-PENDING → AI evaluates → MANUAL_REVIEW → Human decides → APPROVED/REJECTED
+1. Claim submitted → status: PENDING
+2. AI analyzes → aiRecommendation: APPROVE/REJECT/MANUAL_REVIEW
+3. System overrides → status: MANUAL_REVIEW (always)
+4. Human reviews → status: APPROVED/REJECTED
 ```
 
-### Implementation
+### AI Recommendations (Based on Risk Score)
+
+| Risk Score | AI Recommendation | Claim Status | Who Decides |
+|------------|------------------|--------------|-------------|
+| 0-30 | APPROVE | MANUAL_REVIEW | Human |
+| 31-70 | MANUAL_REVIEW | MANUAL_REVIEW | Human |
+| 71-100 | REJECT | MANUAL_REVIEW | Human |
+
+### Post-AI Validation
+
+The system validates AI responses to prevent hallucination:
+
 ```typescript
+// Domain logic overrides AI if inconsistent
+if (riskScore <= 30 && aiRecommendation !== 'APPROVE') {
+  recommendedAction = 'APPROVE'; // Override AI
+}
+```
+
+**Location**: `src/domain/services/RiskAssessmentService.ts` → `getExpectedAction()`
+
+## Why This Matters
+
+1. **Safety First**: No auto-approval/rejection of claims
+2. **AI as Assistant**: AI suggests, humans decide
+3. **Prevent Hallucination**: Business rules override AI inconsistencies
+4. **Compliance**: Human oversight meets regulatory requirements
+5. **Trust**: Explainable decisions (AI reasoning + human review)
+
+## Code Implementation
+
+```typescript
+// Claim entity prevents AI auto-decisions
 class Claim {
-  status: ClaimStatus;              // PENDING | MANUAL_REVIEW | APPROVED | REJECTED
-  aiRecommendation?: RecommendedAction;  // What AI suggests
-  
-  setAIRecommendation(recommendation: RecommendedAction): void {
+  setAIRecommendation(recommendation: RecommendedAction) {
     this.aiRecommendation = recommendation;
-    this.status = ClaimStatus.MANUAL_REVIEW;  // Always
+    this.status = ClaimStatus.MANUAL_REVIEW; // Always manual review
+  }
+  
+  humanApprove() {
+    this.status = ClaimStatus.APPROVED; // Only humans can approve
   }
 }
 ```
 
-### Key Points
+---
 
-1. **AI never auto-approves/rejects** - Always sets status to `MANUAL_REVIEW`
-2. **Separate fields** - `status` (human-controlled) vs `aiRecommendation` (AI suggestion)
-3. **Audit trail** - Know what AI suggested and what human decided
+**This pattern is production-ready for insurance and financial systems where AI errors can have significant consequences.**
 
-### Example
-```json
-{
-  "claimId": "abc-123",
-  "status": "MANUAL_REVIEW",
-  "aiRecommendation": "APPROVE",
-  "riskAssessment": {
-    "riskScore": 15,
-    "category": "AUTO"
-  }
-}
-```
-
-## Alternative Approaches
-
-Other techniques to prevent AI hallucination:
-
-1. **Multi-AI Validation** - Send to 2+ models, flag if disagree (higher cost)
-2. **Confidence Threshold** - Auto-approve only if AI confidence > 95%
-3. **Ensemble Models** - Combine AI + business rules with voting
-
-## Why Human-in-the-Loop?
-
-✅ Simplest to implement  
-✅ Highest safety guarantee  
-✅ Regulatory compliance  
-✅ Clear audit trail  
-
-**Future**: Multi-AI validation for high-value claims (> $10,000).

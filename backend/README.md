@@ -4,64 +4,17 @@ Backend API for insurance claims risk assessment system with AI-powered risk eva
 
 ## 📚 API Documentation
 
-### POST `/api/claims`
+**Endpoint**: `POST /api/claims` - Create claim with AI risk assessment
 
-Create a new insurance claim and receive AI-powered risk assessment.
-
-**Request Body:**
-```json
-{
-  "description": "string (min: 10 chars, max: 1000 chars)",
-  "amount": "number (min: 0, max: 1000000)",
-  "incidentDate": "ISO 8601 date string"
-}
-```
-
-**Success Response (201 Created):**
-```json
-{
-  "claimId": "uuid",
-  "userId": "string",
-  "description": "string",
-  "amount": "number",
-  "status": "MANUAL_REVIEW",
-  "aiRecommendation": "APPROVE | MANUAL_REVIEW | REJECT",
-  "submittedAt": "ISO 8601 datetime",
-  "riskAssessment": {
-    "riskScore": "number (0-100)",
-    "recommendedAction": "APPROVE | MANUAL_REVIEW | REJECT",
-    "category": "AUTO | HEALTH | HOME | PROPERTY | OTHER",
-    "reasoning": "string"
-  }
-}
-```
-
-**Error Response (400 Bad Request):**
-```json
-{
-  "error": "Validation error message",
-  "code": "VALIDATION_ERROR",
-  "details": { /* Joi validation details */ }
-}
-```
-
-**Example Request:**
-```bash
-curl -X POST https://your-api.amazonaws.com/api/claims \
-  -H "Content-Type: application/json" \
-  -d '{
-    "description": "Car accident with severe front-end damage",
-    "amount": 5000,
-    "incidentDate": "2024-01-15T00:00:00.000Z"
-  }'
-```
+See [API Documentation](./docs/api-documentation.md) for complete request/response schemas, validation rules, and examples.
 
 ## 📊 Architecture & Diagrams
-- [Architecture Diagram](./docs/architecture-diagram.md) - System architecture and hexagonal design
-- [Sequence Diagram](./docs/sequence-diagram.md) - API request/response flows
-- [Data Model](./docs/data-model.md) - Database schema and entities
-- [DynamoDB Schema](./docs/dynamodb-schema.md) - DynamoDB table structure
+- [Architecture Diagram](./docs/architecture-diagram.md) - AWS deployment and system architecture
+- [Sequence Diagram](./docs/sequence-diagram.md) - Claim submission flow
 - [AI Safety Design](./docs/ai-safety-design.md) - Human-in-the-Loop pattern and rationale
+- [API Documentation](./docs/api-documentation.md) - Complete API reference with examples
+
+**Note**: User authentication system is planned but not yet implemented. Current implementation uses mock userId for testing.
 
 ## 🤖 AI Risk Assessment Model
 
@@ -77,9 +30,7 @@ The AI analyzes claims and provides **recommendations only**. All claims require
 | 31-70 | MANUAL_REVIEW | MANUAL_REVIEW | Human decides |
 | 71-100 | REJECT | MANUAL_REVIEW | Human decides |
 
-**Important**: AI provides `aiRecommendation`, but claim `status` always goes to `MANUAL_REVIEW`. This prevents AI hallucination risks and ensures human oversight.
-
-See [AI Safety Design](./docs/ai-safety-design.md) for detailed rationale.
+**Important**: AI provides `aiRecommendation`, but claim `status` always goes to `MANUAL_REVIEW`. This prevents AI hallucination risks and ensures human oversight (Human-in-the-Loop pattern).
 
 ## 📊 Observability
 
@@ -127,8 +78,9 @@ Configured in `serverless.yml`:
 | NODE_ENV | Serverless config | Environment stage (dev/prod) |
 | OPENAI_API_KEY | Environment variable | Set during deployment |
 | CLAIMS_TABLE | Serverless config | DynamoDB table name (auto-generated) |
+| FRONTEND_URL | Environment variable | Frontend URL for CORS (e.g., https://your-app.amplifyapp.com) |
 
-**Database**: DynamoDB with on-demand billing (see [DynamoDB Schema](./docs/dynamodb-schema.md)).
+**Database**: DynamoDB table `claims-risk-assessor-claims-dev` with on-demand billing. Includes GSI for userId queries.
 
 ## 🧪 Advanced Testing
 
