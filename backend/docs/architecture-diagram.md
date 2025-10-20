@@ -1,113 +1,71 @@
 # Architecture Diagram
 
-## System Architecture
+## AWS Deployment Architecture
 
 ```mermaid
-graph TD
-    subgraph Client
-        User[End User]
-        Frontend[Frontend - React]
-    end
-
-    subgraph AWS["AWS Cloud"]
-        APIGateway[API Gateway]
-        Lambda[Lambda Function<br/>Node.js 20]
-        DB[(In-Memory Store<br/>Ready for DynamoDB)]
-    end
-
-    subgraph External["External Services"]
-        AI[OpenAI API]
-    end
-
-    User -->|Interacts| Frontend
-    Frontend -->|HTTPS| APIGateway
-    APIGateway -->|Invokes| Lambda
-    Lambda -->|Stores| DB
-    Lambda -->|Risk Assessment| AI
-    AI -->|Score & Action| Lambda
-    Lambda -->|JSON Response| APIGateway
-    APIGateway -->|HTTPS| Frontend
-    Frontend -->|Displays| User
-
-    %% Styling
-    classDef frontend fill:#D5E8D4,stroke:#82B366,stroke-width:2px;
-    classDef aws fill:#FF9900,stroke:#232F3E,stroke-width:2px;
-    classDef external fill:#DAE8FC,stroke:#6C8EBF,stroke-width:2px;
-
-    class Frontend,User frontend;
-    class APIGateway,Lambda,DB aws;
-    class AI external;
-```
-
-## Hexagonal Architecture (Ports & Adapters)
-
-### Layer Structure
-
-```
-src/
-├── domain/              # Business logic & entities (Core)
-│   ├── entities/
-│   │   ├── Claim.ts
-│   │   ├── User.ts
-│   │   └── RiskAssessment.ts
-│   ├── services/
-│   │   └── RiskAssessmentService.ts    # Business rules
-│   └── ports/
-│       └── IRiskAssessmentService.ts   # Port for AI
-│
-├── application/         # Use cases (Application Layer)
-│   ├── usecases/
-│   │   ├── CreateClaimUseCase.ts
-│   │   └── GetClaimByIdUseCase.ts
-│   ├── ports/
-│   │   └── IClaimRepository.ts         # Port for DB
-│   └── validators/
-│       └── createClaimValidator.ts
-│
-├── infrastructure/      # External adapters (Infrastructure)
-│   ├── repositories/
-│   │   ├── ClaimRepositoryMock.ts      # Current: In-Memory
-│   │   └── ClaimRepositoryDynamoDB.ts  # Future: DynamoDB
-│   ├── services/
-│   │   └── OpenAIRiskAssessmentService.ts
-│   └── http/
-│       └── server.ts
-│
-└── interfaces/          # API adapters (Interface Layer)
-    ├── controllers/
-    │   └── ClaimController.ts
-    └── routes/
-        └── claimRoutes.ts
-```
-
-## Component Interaction
-
-```mermaid
-graph LR
-    A[API Gateway] --> B[Lambda Handler]
-    B --> C[ClaimController]
-    C --> D[CreateClaimUseCase]
-    D --> E[ClaimRepository]
-    E --> F[(Database)]
+graph TB
+    User[👤 User<br/>Browser]
     
-    D --> G[RiskAssessmentService]
-    G --> H[OpenAI Service]
-    H -.Fallback.-> G
+    subgraph AWS["AWS Cloud - us-east-1"]
+        Amplify[AWS Amplify<br/>React + TypeScript<br/>CI/CD from GitHub]
+        
+        APIGW[API Gateway<br/>HTTP API<br/>Throttling: 100/sec]
+        
+        Lambda[AWS Lambda<br/>Node.js 20<br/>Express + Helmet<br/>512MB, 30s timeout]
+        
+        DynamoDB[(DynamoDB<br/>ClaimsTable<br/>On-Demand Billing)]
+    end
     
-    G --> D
-    D --> C
-    C --> B
-    B --> I[JSON Response]
+    OpenAI[🤖 OpenAI API<br/>GPT-3.5<br/>Risk Assessment]
     
-    style G fill:#f9f,stroke:#333,stroke-width:2px
-    style D fill:#bbf,stroke:#333,stroke-width:2px
-    style H fill:#ffa,stroke:#333,stroke-width:2px
+    User -->|HTTPS| Amplify
+    Amplify -->|API Calls| APIGW
+    APIGW -->|Invoke| Lambda
+    Lambda -->|Read/Write| DynamoDB
+    Lambda -->|Assess Risk| OpenAI
+    
+    style Amplify fill:#FF9900,color:#fff
+    style APIGW fill:#FF9900,color:#fff
+    style Lambda fill:#FF9900,color:#fff
+    style DynamoDB fill:#4053D6,color:#fff
+    style OpenAI fill:#10A37F,color:#fff
 ```
 
-## Key Principles
+## AWS Services
 
-1. **Dependency Inversion**: Core domain depends on nothing, all dependencies point inward
-2. **Port & Adapters**: External systems communicate through defined interfaces (ports)
-3. **Separation of Concerns**: Each layer has a single responsibility
-4. **Testability**: Business logic isolated and easily testable
+| Service | Purpose | Configuration |
+|---------|---------|---------------|
+| **AWS Amplify** | Frontend hosting & CI/CD | Auto-deploy from GitHub main branch |
+| **API Gateway** | HTTP routing & rate limiting | 100 req/sec, 200 burst capacity |
+| **Lambda** | Serverless compute | Node.js 20, 512MB RAM, 30s timeout |
+| **DynamoDB** | NoSQL database | On-demand, GSI for userId queries |
+| **OpenAI** | AI risk assessment | External service (GPT-3.5) |
 
+## Security Layers
+
+```
+Internet
+  ↓
+API Gateway (Throttling + CORS)
+  ↓
+Lambda (Helmet + Rate Limiting + Input Validation)
+  ↓
+DynamoDB (IAM Permissions)
+  ↓
+OpenAI (API Key Authentication)
+```
+
+## Request Flow
+
+1. User submits claim via Amplify-hosted React app
+2. API Gateway routes request to Lambda (with throttling)
+3. Lambda validates input with Joi schemas
+4. Lambda saves claim to DynamoDB
+5. Lambda calls OpenAI for AI risk assessment
+6. Lambda validates AI response (anti-hallucination)
+7. Lambda updates claim in DynamoDB with assessment
+8. Response flows back through API Gateway to frontend
+
+---
+
+**For hexagonal architecture and code structure details, see main [README](../../README.md)**

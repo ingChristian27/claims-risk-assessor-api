@@ -87,6 +87,30 @@ npm run preview
 
 # Run ESLint
 npm run lint
+
+# Run tests (Vitest)
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+```
+
+## 🧪 Testing
+
+**Framework**: Vitest + React Testing Library
+
+**Test Coverage**: 16 tests across 4 files
+- ✅ `currency.test.ts` - Utility functions
+- ✅ `useApiMutation.test.ts` - Custom hooks
+- ✅ `Badge.test.tsx` - UI components
+- ✅ `HomePage.test.tsx` - Integration tests (form → backend → results)
+
+```bash
+# Run all tests
+npm test
+
+# Watch mode for TDD
+npm run test:watch
 ```
 
 ## 🌍 Environment Variables
