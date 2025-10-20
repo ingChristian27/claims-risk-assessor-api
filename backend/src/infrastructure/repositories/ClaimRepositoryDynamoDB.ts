@@ -118,6 +118,7 @@ export class ClaimRepositoryDynamoDB implements IClaimRepository {
             riskScore: riskAssessment.riskScore,
             recommendedAction: riskAssessment.recommendedAction,
             category: riskAssessment.category,
+            reasoning: riskAssessment.reasoning,
             assessedAt: riskAssessment.assessedAt.toISOString(),
           },
           ':status': ClaimStatus.MANUAL_REVIEW,

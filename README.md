@@ -59,7 +59,7 @@ claims-risk-assessor/
 - Node.js 20+
 - npm or yarn
 
-### Backend (Local)
+### Backend Setup
 ```bash
 cd backend
 npm install
@@ -68,14 +68,12 @@ cp .env.example .env
 npm run dev
 ```
 
-Server runs on `http://localhost:3000`
-
-### Frontend (Local)
+### Frontend Setup
 ```bash
 cd frontend
 npm install
 cp .env.example .env
-# Update VITE_API_URL if needed (defaults to http://localhost:3000/api)
+# Set VITE_API_URL to your backend URL
 npm run dev
 ```
 
@@ -109,29 +107,28 @@ cd backend
 npm test
 ```
 
-## 📊 Production Deployment
+## 🎓 Key Features
 
-**Frontend**: AWS Amplify  
-**URL**: https://main.d1n498i7rx6ywn.amplifyapp.com
+### Backend
+- **Hexagonal Architecture**: Clean separation of domain, application, and infrastructure
+- **Domain-Driven Design**: Rich domain entities with business logic
+- **AI Safety**: Human-in-the-Loop pattern prevents AI hallucination risks
+- **DynamoDB Integration**: Serverless persistence with GSI for queries
+- **Error Handling**: Centralized domain exceptions with error codes
+- **TypeScript**: Strict type safety across the stack
 
-**Backend**: AWS Lambda + API Gateway  
-**Region**: us-east-1
+### Frontend
+- **Custom Hooks**: Generic `useApiMutation` (React Query pattern)
+- **Path Aliases**: Clean imports (`@hooks`, `@blocks`, `@components`)
+- **Container/Presentational**: Separation of logic and UI
+- **Axios Interceptors**: Centralized HTTP error handling
+- **Atomic Design**: Scalable component hierarchy
+- **Performance**: Selective React.memo optimization
 
-## 🎓 Learning Highlights
-
-This project demonstrates:
-- Hexagonal Architecture in practice
-- Domain-Driven Design principles
-- Professional error handling patterns
-- Test-Driven Development
-- AWS serverless deployment
-- Modern React patterns
-
-## 📝 License
-
-ISC
-
-## 👨‍💻 Author
-
-Christian Dachiardi
+### DevOps
+- **Monorepo**: Single repository for frontend and backend
+- **Serverless Framework**: Infrastructure as Code
+- **AWS Lambda**: Auto-scaling, pay-per-use
+- **AWS Amplify**: CI/CD for frontend
+- **Environment Management**: Secure configuration handling
 

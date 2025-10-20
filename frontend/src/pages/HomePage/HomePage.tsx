@@ -1,25 +1,58 @@
-import { useState } from 'react';
-import { Container } from '@mui/material';
-import { MainLayout } from '../../components/templates/MainLayout/MainLayout';
-import { ClaimForm } from '../../components/blocks/ClaimForm/ClaimForm';
-import { RiskAssessmentPanel } from '../../components/blocks/RiskAssessmentPanel/RiskAssessmentPanel';
-import type { Claim } from '../../types';
+import { Container, Box } from "@mui/material";
+import { MainLayout } from "@templates/MainLayout/MainLayout";
+import { ClaimForm, type ClaimFormData } from "@blocks/ClaimForm/ClaimForm";
+import { RiskAssessmentPanel } from "@blocks/RiskAssessmentPanel/RiskAssessmentPanel";
+import { RiskAssessmentSkeleton } from "@blocks/RiskAssessmentPanel/RiskAssessmentSkeleton";
+import { EmptyState } from "@blocks/EmptyState/EmptyState";
+import { homePageStyles } from "./HomePage.styles";
+import { createClaim } from "@services/api";
+import { useApiMutation } from "@hooks/useApiMutation";
+import type { Claim, CreateClaimRequest } from "@types";
 
 export const HomePage = () => {
-  const [submittedClaim, setSubmittedClaim] = useState<Claim | null>(null);
+  const {
+    mutate: submitClaim,
+    isLoading,
+    error,
+    data: submittedClaim,
+  } = useApiMutation<Claim, CreateClaimRequest>(createClaim);
 
-  const handleClaimSuccess = (claim: Claim) => {
-    setSubmittedClaim(claim);
+  const handleSubmit = async (data: ClaimFormData) => {
+    const claimData: CreateClaimRequest = {
+      description: data.description,
+      amount: Number(data.amount),
+      incidentDate: new Date(data.incidentDate).toISOString(),
+    };
+
+    await submitClaim(claimData);
   };
 
   return (
     <MainLayout>
-      <Container maxWidth="xl">
-        <ClaimForm onSuccess={handleClaimSuccess} />
+      <Box sx={homePageStyles.mainContainer}>
+        {/* Scrollable results area */}
+        <Box sx={homePageStyles.scrollableArea}>
+          <Container maxWidth="md" sx={homePageStyles.contentContainer}>
+            {isLoading ? (
+              <RiskAssessmentSkeleton />
+            ) : !submittedClaim ? (
+              <EmptyState />
+            ) : (
+              <RiskAssessmentPanel claim={submittedClaim} />
+            )}
+          </Container>
+        </Box>
 
-        {submittedClaim && <RiskAssessmentPanel claim={submittedClaim} />}
-      </Container>
+        <Box sx={homePageStyles.fixedFormContainer}>
+          <Container maxWidth="md">
+            <ClaimForm
+              onSubmit={handleSubmit}
+              isLoading={isLoading}
+              error={error}
+            />
+          </Container>
+        </Box>
+      </Box>
     </MainLayout>
   );
 };
-

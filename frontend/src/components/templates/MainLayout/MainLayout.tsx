@@ -21,16 +21,8 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
         </Container>
       </Box>
 
-      <Container component="main" sx={mainLayoutStyles.main}>
+      <Box component="main" sx={mainLayoutStyles.main}>
         {children}
-      </Container>
-
-      <Box component="footer" sx={mainLayoutStyles.footer}>
-        <Container maxWidth="sm">
-          <Typography variant="body2" color="text.secondary" align="center" sx={mainLayoutStyles.footerText}>
-            © 2025 Claims Risk Assessor
-          </Typography>
-        </Container>
       </Box>
     </Box>
   );

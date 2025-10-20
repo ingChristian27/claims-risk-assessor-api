@@ -4,7 +4,7 @@ Backend API for insurance claims risk assessment system with AI-powered risk eva
 
 ## 📚 API Documentation
 
-**Interactive API Docs (Swagger UI)**: `http://localhost:3000/api-docs`
+**Interactive API Docs (Swagger UI)**: Available at `/api-docs` endpoint
 
 See [Swagger Setup Guide](./docs/swagger-setup.md) for implementation details.
 
@@ -25,9 +25,9 @@ The AI analyzes claims and provides **recommendations only**. All claims require
 
 | Risk Score | AI Recommendation | Claim Status | Final Decision |
 |------------|------------------|--------------|----------------|
-| 0-29 | APPROVE | MANUAL_REVIEW | Human decides |
-| 30-69 | MANUAL_REVIEW | MANUAL_REVIEW | Human decides |
-| 70-100 | REJECT | MANUAL_REVIEW | Human decides |
+| 0-30 | APPROVE | MANUAL_REVIEW | Human decides |
+| 31-70 | MANUAL_REVIEW | MANUAL_REVIEW | Human decides |
+| 71-100 | REJECT | MANUAL_REVIEW | Human decides |
 
 **Important**: AI provides `aiRecommendation`, but claim `status` always goes to `MANUAL_REVIEW`. This prevents AI hallucination risks and ensures human oversight.
 
@@ -54,9 +54,10 @@ Configured in `serverless.yml`:
 | Variable | Source | Description |
 |----------|--------|-------------|
 | NODE_ENV | Serverless config | Environment stage (dev/prod) |
-| OPENAI_API_KEY | Environment variable | Taken from your local env when deploying |
+| OPENAI_API_KEY | Environment variable | Set during deployment |
+| CLAIMS_TABLE | Serverless config | DynamoDB table name (auto-generated) |
 
-**Note**: Currently using in-memory Mock repository (ready for DynamoDB migration).
+**Database**: DynamoDB with on-demand billing (see [DynamoDB Schema](./docs/dynamodb-schema.md)).
 
 ## 🧪 Advanced Testing
 

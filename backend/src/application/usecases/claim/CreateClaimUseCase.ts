@@ -48,11 +48,11 @@ export class CreateClaimUseCase {
     const riskAssessmentRequest =
       this.riskAssessmentService.generateRiskAssessmentRequest(savedClaim);
 
-    // 4. Call AI service to get raw JSON response
+    // 4. Call AI service to calculate risk
     const { data: aiJsonResponse, error: aiError } =
       await this.riskAssessmentServicePort.calculateRisk(riskAssessmentRequest);
 
-    // 5. Throw error if AI service fails
+    // 5. Handle AI service errors
     if (aiError) {
       throw new DomainException(
         `AI risk assessment failed: ${aiError.message}`,
@@ -77,6 +77,7 @@ export class CreateClaimUseCase {
       riskCalculation.riskScore,
       riskCalculation.recommendedAction,
       riskCalculation.category,
+      riskCalculation.reasoning,
     );
 
     // 8. Set AI recommendation and update status to MANUAL_REVIEW
@@ -99,6 +100,7 @@ export class CreateClaimUseCase {
         riskScore: riskAssessment.riskScore,
         recommendedAction: riskAssessment.recommendedAction,
         category: riskAssessment.category,
+        reasoning: riskAssessment.reasoning,
       },
     };
   }

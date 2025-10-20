@@ -1,18 +1,23 @@
+import { memo } from 'react';
 import { Chip } from '@mui/material';
-import type { ClaimStatus } from '../../../types';
+import type { ClaimStatus, RecommendedAction } from '@types';
 
 interface BadgeProps {
-  status: ClaimStatus;
+  status: ClaimStatus | RecommendedAction;
 }
 
-const statusConfig: Record<ClaimStatus, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
-  APPROVE: { label: 'Approved', color: 'success' },
+const statusConfig: Record<ClaimStatus | RecommendedAction, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
+  // Claim Statuses
+  APPROVED: { label: 'Approved', color: 'success' },
   MANUAL_REVIEW: { label: 'Manual Review', color: 'warning' },
-  REJECT: { label: 'Rejected', color: 'error' },
+  REJECTED: { label: 'Rejected', color: 'error' },
   PENDING: { label: 'Pending', color: 'default' },
+  // AI Recommendations
+  APPROVE: { label: 'Approve', color: 'success' },
+  REJECT: { label: 'Reject', color: 'error' },
 };
 
-export const Badge = ({ status }: BadgeProps) => {
+const BadgeComponent = ({ status }: BadgeProps) => {
   const config = statusConfig[status];
   return (
     <Chip
@@ -26,4 +31,6 @@ export const Badge = ({ status }: BadgeProps) => {
     />
   );
 };
+
+export const Badge = memo(BadgeComponent);
 

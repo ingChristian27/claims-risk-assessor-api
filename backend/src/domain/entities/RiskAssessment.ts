@@ -21,6 +21,7 @@ export class RiskAssessment {
     public readonly riskScore: number,
     public readonly recommendedAction: RecommendedAction,
     public readonly category: ClaimCategory,
+    public readonly reasoning: string,
     public readonly assessedAt: Date,
   ) {
     this.validateRiskScore(riskScore);

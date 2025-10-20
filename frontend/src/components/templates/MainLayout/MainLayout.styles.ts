@@ -4,36 +4,28 @@ export const mainLayoutStyles = {
   root: {
     display: 'flex',
     flexDirection: 'column',
-    minHeight: '100vh',
+    height: '100vh',
     bgcolor: 'background.default',
   } as SxProps<Theme>,
 
   header: {
-    py: 3,
-    bgcolor: '#f8fafc', // Lighter blue-gray from same family
+    py: 2.5,
+    bgcolor: 'background.paper',
     borderBottom: '1px solid',
-    borderColor: 'rgba(0, 0, 0, 0.06)',
+    borderColor: 'divider',
   } as SxProps<Theme>,
 
   headerTitle: {
     fontWeight: 600,
-    letterSpacing: '-0.01em',
-    color: 'primary.main',
+    letterSpacing: '-0.02em',
+    color: '#1e3a8a',
+    fontSize: '1.1rem',
   } as SxProps<Theme>,
 
   main: {
     flex: 1,
-    py: 6,
-  } as SxProps<Theme>,
-
-  footer: {
-    py: 4,
-    px: 2,
-    mt: 'auto',
-    bgcolor: 'background.default',
-  } as SxProps<Theme>,
-
-  footerText: {
-    fontWeight: 400,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
   } as SxProps<Theme>,
 };
