@@ -40,7 +40,8 @@
     "joi": "^17.11.0",
     "openai": "^6.4.0",
     "tsconfig-paths": "^4.2.0",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.0",
+    "winston": "^3.18.3"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.156",
@@ -50,6 +51,7 @@
     "@types/node": "^20.10.4",
     "@types/supertest": "^6.0.3",
     "@types/uuid": "^10.0.0",
+    "@types/winston": "^2.4.4",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.55.0",

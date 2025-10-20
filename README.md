@@ -36,7 +36,7 @@ claims-risk-assessor/
 - **Architecture**: Hexagonal (Ports & Adapters) + DDD
 - **AI**: OpenAI GPT-3.5
 - **Validation**: Joi
-- **Testing**: Jest (15 tests)
+- **Testing**: Jest (19 tests)
 - **Deployment**: AWS Lambda + Serverless Framework
 
 ### Frontend
@@ -122,8 +122,9 @@ npm test
 - **Domain-Driven Design**: Rich domain entities with business logic
 - **AI Safety**: Human-in-the-Loop pattern prevents AI hallucination risks
 - **DynamoDB Integration**: Serverless persistence with GSI for queries
+- **Observability**: Structured logging with Winston (JSON format for CloudWatch)
 - **Security**: Helmet.js headers, CORS configuration, input validation
-- **Testing**: 87% coverage with 23 strategic tests
+- **Testing**: 87% coverage with 19 strategic tests
 - **Error Handling**: Centralized domain exceptions with error codes
 - **TypeScript**: Strict type safety across the stack
 
