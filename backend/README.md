@@ -81,19 +81,27 @@ The AI analyzes claims and provides **recommendations only**. All claims require
 
 See [AI Safety Design](./docs/ai-safety-design.md) for detailed rationale.
 
+## 📊 Observability
+
+### Structured Logging
+- **Framework**: Winston with JSON format
+- **Location**: `src/infrastructure/logger/WinstonLogger.ts`
+- **Architecture**: Port/Adapter pattern (`ILogger` interface in domain)
+- **CloudWatch**: Logs automatically indexed for efficient querying
+
+**Key logged events:**
+- Claim creation with metadata (claimId, amount, userId)
+- Risk assessment completion (riskScore, category, recommendedAction)
+- AI service failures with error details
+
 ## 🔐 Security
 
-### Implemented Protections
 - **Helmet.js**: Security headers (XSS, clickjacking, MIME sniffing)
 - **CORS**: Environment-specific origin configuration
 - **Input Validation**: Joi schemas with strict rules
 - **Payload Limit**: 1MB max to prevent DOS attacks
+- **Rate Limiting**: express-rate-limit (100 req/15min), API Gateway throttling in production
 - **AI Validation**: Post-processing to prevent hallucination
-
-### Rate Limiting
-- **Local Development**: express-rate-limit (100 req/15min per IP)
-- **AWS Production**: API Gateway throttling (100 req/sec, 200 burst)
-- **OpenAI API**: Handled by OpenAI SDK with automatic retry
 
 ## 🔐 Environment Variables
 

@@ -3,6 +3,7 @@ import { RiskAssessmentService } from '@domain/services/RiskAssessmentService';
 import { DomainException } from '@domain/exceptions';
 import { ErrorCode } from '@domain/types';
 import type { IRiskAssessmentService } from '@domain/ports/IRiskAssessmentService';
+import type { ILogger } from '@domain/ports/ILogger';
 import { createClaimSchema } from '@application/validators';
 import { CreateClaimDTO } from '@application/dtos/CreateClaimDTO';
 import { ClaimResponseDTO } from '@application/dtos/ClaimResponseDTO';
@@ -14,6 +15,7 @@ export class CreateClaimUseCase {
   constructor(
     private claimRepository: IClaimRepository,
     private riskAssessmentServicePort: IRiskAssessmentService,
+    private logger: ILogger,
   ) {
     this.riskAssessmentService = new RiskAssessmentService();
   }
@@ -43,6 +45,12 @@ export class CreateClaimUseCase {
 
     // 2. Save claim to repository
     const savedClaim = await this.claimRepository.create(claim);
+    
+    this.logger.info('Claim created', {
+      claimId: savedClaim.claimId,
+      amount: savedClaim.amount,
+      userId: savedClaim.userId,
+    });
 
     // 3. Generate risk assessment request (domain logic)
     const riskAssessmentRequest =
@@ -54,6 +62,11 @@ export class CreateClaimUseCase {
 
     // 5. Handle AI service errors
     if (aiError) {
+      this.logger.error('AI risk assessment failed', {
+        claimId: savedClaim.claimId,
+        error: aiError.message,
+      });
+      
       throw new DomainException(
         `AI risk assessment failed: ${aiError.message}`,
         ErrorCode.EXTERNAL_SERVICE_ERROR,
@@ -86,6 +99,14 @@ export class CreateClaimUseCase {
 
     // 9. Save risk assessment to claim in database
     await this.claimRepository.updateWithRiskAssessment(savedClaim.claimId, riskAssessment);
+    
+    this.logger.info('Risk assessment completed', {
+      claimId: savedClaim.claimId,
+      riskScore: riskAssessment.riskScore,
+      recommendedAction: riskAssessment.recommendedAction,
+      category: riskAssessment.category,
+      status: savedClaim.status,
+    });
 
     // 10. Return complete response
     return {
